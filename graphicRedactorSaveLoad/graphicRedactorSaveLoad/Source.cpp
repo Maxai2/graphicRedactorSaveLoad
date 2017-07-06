@@ -10,7 +10,7 @@ void main()
 	srand(time(NULL));
 
 	CELL field[row][col] = {};
-	//	ShowConsoleCursor(false);
+	ShowConsoleCursor(false);
 	menu(field);
 
 	//for (int i = 0; i < 10; i++)

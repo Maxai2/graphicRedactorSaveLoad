@@ -80,3 +80,14 @@ template <typename T> void drawData(T data, Colors c1, Colors c2, int row = -1, 
 //		return FALSE;
 //	return TRUE;
 //}
+//----------------------------------------------------------------------------------------------
+void ShowConsoleCursor(bool showFlag)
+{
+	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	CONSOLE_CURSOR_INFO     cursorInfo;
+
+	GetConsoleCursorInfo(out, &cursorInfo);
+	cursorInfo.bVisible = showFlag; // set the cursor visibility
+	SetConsoleCursorInfo(out, &cursorInfo);
+}
