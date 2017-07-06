@@ -1,23 +1,16 @@
-﻿#include <iostream>
-#include <time.h>
+﻿#include <time.h>
 #include <windows.h>
 //-----------------------------------------------
 #include "draw.h"
 
 using namespace std;
 
-typedef struct 
-{
-	char symbol;
-	Colors bg;
-	Colors fg;
-}Cell;
-//-----------------------------------------------
 void main()
 {
 	srand(time(NULL));
-	Cell field[19][49] = {};
 
+	CELL field[row][col] = {};
+	//	ShowConsoleCursor(false);
 	menu(field);
 
 	//for (int i = 0; i < 10; i++)
