@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <conio.h>
+//#include <conio.h>
 #include <Windows.h>
 
 using namespace std;
@@ -26,16 +26,42 @@ enum Colors
 	WHITE
 };
 //-----------------------------------------------------------------------------------------------
+#pragma pack(1)
 typedef struct
 {
 	char symbol;
-	Colors bg;
-	Colors fg;
-}CELL;
+	//Colors bg;
+	//Colors fg;
+	char bg : 4;
+	char fg : 4;
+}
+CELL;
+#pragma pack(4)
 //-----------------------------------------------
-const int row = 23, col = 23;
+const int row = 20, col = 50;
+const int rowS = 7, colS = 18;
 
-void menu(CELL field[row][col]);
+enum Command
+{
+	cNew, cColors, cSymbols, cLoad, cSave, cClear, cExit, cDraw
+};
+
+Command menu(bool first, int &sel);
+void showMenu(bool first, int sel);
+void ShowSymCol();
+void clearMenu();
+void symbols();
+char cSymbol();
+int cColorfg();
+int cColorbg();
+void draw(char sym = '*', int fg = LIGHTGREY, int bg = BLACK);
+void clearColorRedact();
+void clearTable();
+void Cursor(bool showFlag);
+void frame();
+bool save(char *FileName);
+bool load(char *FileName);
+char * AskFileName(char *Prompt);
 
 //HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 //-----------------------------------------------------------------------------------------------
@@ -67,27 +93,4 @@ template <typename T> void drawData(T data, Colors c1, Colors c2, int row = -1, 
 //	}
 //	COLOR(LIGHTGREY, BLACK);
 //}
-//-----------------------------------------------------------------------------------------------
-//BOOL ShowConsoleCursor(BOOL bShow)
-//{
-//	CONSOLE_CURSOR_INFO cci;
-//	if (h == INVALID_HANDLE_VALUE)
-//		return FALSE;
-//	if (!GetConsoleCursorInfo(h, &cci))
-//		return FALSE;
-//	cci.bVisible = bShow;
-//	if (!SetConsoleCursorInfo(h, &cci))
-//		return FALSE;
-//	return TRUE;
-//}
 //----------------------------------------------------------------------------------------------
-void ShowConsoleCursor(bool showFlag)
-{
-	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	CONSOLE_CURSOR_INFO     cursorInfo;
-
-	GetConsoleCursorInfo(out, &cursorInfo);
-	cursorInfo.bVisible = showFlag; // set the cursor visibility
-	SetConsoleCursorInfo(out, &cursorInfo);
-}

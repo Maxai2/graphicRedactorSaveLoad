@@ -1,38 +1,34 @@
 #include <iostream>
-#include <Windows.h>
+//#include <Windows.h>
 #include <conio.h>
+//-----------------------------------------------------------------------------------------------
 
+//#include "Cursor.h"
 #include "draw.h"
 //-----------------------------------------------------------------------------------------------
-void showMenu(int choose, int sel);
-void newPicture();
-void clearMenu();
-char cSymbol();
-int cColorfg();
-int cColorbg();
-void draw(CELL field[row][col], char sym = '*', int fg = LIGHTGREY, int bg = BLACK);
-void clearColorRedact();
-void clearTable();
+extern int fg, bg;
+extern char sym;
+extern bool color;
+
+extern char path[_MAX_PATH];
+extern CELL field[row][col];
 //-----------------------------------------------------------------------------------------------
-int fg = 7, bg = 0;
-char sym = '*';
-//-----------------------------------------------------------------------------------------------
-void menu(CELL field[row][col])
+Command menu(bool first, int &sel)
 {
-	static int sel = 0, choose = 1, count = 0, key = 0;
-	//	_setcursortype(_NOCURSOR);
-	//	ShowCursor(0);
+	int count;
+
+	Cursor(false);
 
 	while (true)
 	{
-		showMenu(choose, sel);
+		showMenu(first, sel);
 
-		if (choose == 1)
+		if (first)
 			count = 3;
 		else
 			count = 6;
 
-		key = getch();
+		int key = getch();
 		if (key == 224)
 			key = getch();
 
@@ -40,13 +36,45 @@ void menu(CELL field[row][col])
 			sel--;
 		else if (key == 80 && sel < count - 1) // Down
 			sel++;
-
 		else if (key == 13)
 		{
-			switch (sel)
+			if (first)
 			{
-			case 0:
-				if (count == 3)
+				switch (sel)
+				{
+				case 0:
+					return cNew;
+				case 1:
+					return cLoad;
+				case 2:
+					return cExit;
+				}
+			}
+			else
+			{
+				switch (sel)
+				{
+				case 0:
+					return cColors;
+				case 1:
+					return cSymbols;
+				case 2:
+					return cClear;
+				case 3:
+					return cLoad;
+				case 4:
+					return cSave;
+				case 5:
+					return cExit;
+				}
+			}
+		}
+		else if (key == 9) // Tab
+			return cDraw;
+	}
+}
+/*
+					if (count == 3)
 				{
 					newPicture();
 					clearMenu();
@@ -54,9 +82,14 @@ void menu(CELL field[row][col])
 				}	//New
 				else
 				{
+					color = false;
+					showMenu(choose, sel);
+					Cursor(true);
 					fg = cColorfg();
 					bg = cColorbg();
 					clearColorRedact();
+					color = true;
+					Cursor(false);
 				}
 				//cColorfgbg();
 				break;
@@ -64,9 +97,16 @@ void menu(CELL field[row][col])
 			case 1:
 				if (count == 3)
 				{
+					load();
 				}	//Load 
 				else
+				{
+					color = false;
+					showMenu(choose, sel);
 					sym = cSymbol();
+					color = true;
+					symbols();
+				}
 				//cSymbol();
 				break;
 
@@ -79,43 +119,60 @@ void menu(CELL field[row][col])
 				break;
 
 			case 3:
+				load();
 				// Load
 				break;
 
 			case 4:
+				save();
 				//Save
 				break;
 
 			case 5:
 				return;
 				//Exit
-				break;
 			}
 		}
 		else if (key == 9) // Tab
-			draw(field, sym, fg, bg);
+		{
+			color = false;
+			showMenu(choose, sel);
+			Cursor(true);
+			draw(sym, fg, bg);
+		}
 	}
-}
+*/
+
 //-----------------------------------------------------------------------------------------------
 void frame()
 {
-	short rowS = 7, rowF = 26, colS = 18, colF = 67;
+	COORDS(rowS - 1, colS - 1);
 
-	for (short i = rowS; i < rowF; i++)
+	for (short c = 0; c < col + 2; c++)
+		cout << char(178);
+
+	for (short r = 0; r < row; r++)
 	{
-		COORDS(i, colS);
+		COORDS(r + rowS, colS - 1);
+		cout << char(178);
 
-		for (short j = colS; j < colF; j++)
+		for (short c = 0; c < col; c++)
 		{
-			if (i == rowS || i == rowF - 1)
-				cout << char(178);
-			else if (rowS + 1 <= i && i <= rowF - 2 && (j == colS || j == colF - 1))
-			{
-				COORDS(i, j);
-				cout << char(178);
-			}
+			CELL *f = &field[r][c];
+//			f->symbol = sym;
+//			f->fg = Colors(fg);
+//			f->bg = Colors(bg);
+
+			drawData(f->symbol, (Colors)f->fg, (Colors)f->bg);
 		}
+
+		cout << char(178);
 	}
+
+	COORDS(rowS + row, colS - 1);
+
+	for (short c = 0; c < col + 2; c++)
+		cout << char(178);
 }
 //-----------------------------------------------------------------------------------------------
 void colors()
@@ -127,6 +184,7 @@ void colors()
 		COLOR(i, BLACK);
 		cout << i << " ";
 	}
+	COLOR(LIGHTGREY, BLACK);
 }
 //-----------------------------------------------------------------------------------------------
 void symbols()
@@ -202,31 +260,22 @@ char cSymbol()
 	int key, sel = 0;
 	short row = 10, col = 5;
 	int sym[17] = { 34, 36, 40, 41, 42, 43, 45, 46, 47, 60, 62, 64, 92, 94, 95, 124, 126 };
+//	symbols();
 
 	while (true)
 	{
 		symbols();
 
 		COORDS(row, col);
+		if (sym[sel] % 2 == 0 || sym[sel] % 2 == 1)
+			COLOR(GREEN, BLACK);
 
-		if (sym[sel] % 2 == 0)
-		{
-			COLOR(CYAN, BLACK);
-			cout << char(sym[sel]);
-		}
+		cout << char(sym[sel]);
 
-		COORDS(row, col);
-
-		COLOR(LIGHTGREY, BLACK);
-		if (sym[sel] % 2 == 1)
-		{
-			COLOR(CYAN, BLACK);
-			cout << char(sym[sel]);
-		}
 		COLOR(LIGHTGREY, BLACK);
 
 		key = getch();
-		if (key == 0)
+		if (key == 224)
 			key = getch();
 
 		if (key == 72 && row >= 11) // Up
@@ -250,10 +299,9 @@ void clearMenu()
 
 	for (short i = rowS; i < rowF; i++)
 	{
+		COORDS(i, colS);
 		for (short j = colS; j < colF; j++)
 		{
-			COORDS(i, j);
-
 			cout << " ";
 		}
 	}
@@ -261,66 +309,68 @@ void clearMenu()
 //-----------------------------------------------------------------------------------------------
 void clearTable()
 {
-	short rowS = 8, rowF = 25, colS = 19, colF = 66;
-
-	for (short i = rowS; i < rowF; i++)
+	for (short r = 0; r < row; r++)
 	{
-		for (short j = colS; j < colF; j++)
+		for (short c = 0; c < col; c++)
 		{
-			COORDS(i, j);
+			CELL *f = &field[r][c];
+			f->symbol = ' ';
+			f->fg = BLACK;
+			f->bg = BLACK;
 
-			cout << " ";
 		}
 	}
 }
 //-----------------------------------------------------------------------------------------------
-void newPicture()
+void ShowSymCol()
 {
-	frame();
 	symbols();
 	colors();
 }
 //-----------------------------------------------------------------------------------------------
-void draw(CELL field[row][col], char sym, int fg, int bg)
+void draw(char sym, int fg, int bg)
 {
 	int key = 0;
-	short rowD = 8, colD = 19;
+	short r = 0, c = 0;
 	while (true)
 	{
-		COORDS(rowD, colD);
+		COORDS(rowS + r, colS + c);
 
 		key = getch();
 		if (key == 224)
 			key = getch();
 
-		if (key == 72 && rowD > 8) // Up
-			rowD--;
-		else if (key == 80 && rowD < 24) // Down
-			rowD++;
-		else if (key == 75 && colD > 19) // Left
-			colD--;
-		else if (key == 77 && colD < 65) // Right
-			colD++;
+		if (key == 72 && r > 0) // Up
+			r--;
+		else if (key == 80 && r < row - 1) // Down
+			r++;
+		else if (key == 75 && c > 0) // Left
+			c--;
+		else if (key == 77 && c < col - 1) // Right
+			c++;
 		else if (key == 32) // enter 13 space 32
 		{
-			field[rowD][colD].symbol = sym;
-			field[rowD][colD].fg = Colors(fg);
-			field[rowD][colD].bg = Colors(bg);
+			CELL *f = &field[r][c];
+			f->symbol = sym;
+			f->fg = fg & 0xF;
+			f->bg = bg & 0xF;
 
-			drawData(field[rowD][colD].symbol, field[rowD][colD].fg, field[rowD][colD].bg);
+			drawData(f->symbol, (Colors)f->fg, (Colors)f->bg);
 		}
 		else if (key == 83) // backspace 8 del 83
 			cout << " ";
 		else if (key == 9)
-			menu(field);
+		{
+			return;
+		}
 	}
 }
 //-----------------------------------------------------------------------------------------------
-void showMenu(int choose, int sel)
+void showMenu(bool first, int sel)
 {
 	clearMenu();
 
-	if (choose == 1)
+	if (first)
 	{
 		COORDS(0, 0);
 		COLOR(sel == 0 ? GREEN : LIGHTGREY, BLACK);
@@ -337,30 +387,185 @@ void showMenu(int choose, int sel)
 	else
 	{
 		COORDS(0, 0);
-		COLOR(sel == 0 ? GREEN : LIGHTGREY, BLACK);
+		COLOR((sel == 0 && color == true) ? GREEN : LIGHTGREY, BLACK);
 		cout << "Choose  color";
 
 		COORDS(1, 0);
-		COLOR(sel == 1 ? GREEN : LIGHTGREY, BLACK);
+		COLOR((sel == 1 && color == true) ? GREEN : LIGHTGREY, BLACK);
 		cout << "Choose symbol";
 
 		COORDS(2, 1);
-		COLOR(sel == 2 ? GREEN : LIGHTGREY, BLACK);
+		COLOR((sel == 2 && color == true) ? GREEN : LIGHTGREY, BLACK);
 		cout << "Clear table";
 
 		COORDS(3, 3);
-		COLOR(sel == 3 ? GREEN : LIGHTGREY, BLACK);
+		COLOR((sel == 3 && color == true) ? GREEN : LIGHTGREY, BLACK);
 		cout << "Load";
 
 		COORDS(4, 3);
-		COLOR(sel == 4 ? GREEN : LIGHTGREY, BLACK);
+		COLOR((sel == 4 && color == true) ? GREEN : LIGHTGREY, BLACK);
 		cout << "Save";
 
 		COORDS(5, 3);
-		COLOR(sel == 5 ? GREEN : LIGHTGREY, BLACK);
+		COLOR((sel == 5 && color == true) ? GREEN : LIGHTGREY, BLACK);
 		cout << "Exit";
 	}
 
 	COLOR(LIGHTGREY, BLACK);
 }
 //-----------------------------------------------------------------------------------------------
+#define TAG "APF"
+
+bool save(char *FileName)
+{
+	char newpath[_MAX_PATH];
+
+	strcpy(newpath, path);
+	strcat(newpath, "\\");
+	strcat(newpath, FileName);
+	
+	FILE *f = fopen(newpath, "wb");
+	if (f == NULL)
+		return false;
+
+	bool ret = true;
+/*
+	for (size_t i = 0; ret && i < row; i++)
+		for (size_t j = 0; j < col; j++)
+			if (EOF == fwrite(&field[i][j], sizeof(CELL), 1, f))
+			{
+				ret = false;
+				break;
+			}
+*/
+	if (EOF == fwrite(TAG, 3, 1, f))
+	{
+		ret = false;
+		goto exit;
+	}
+
+	if (EOF == fwrite(&row, sizeof(row), 1, f))
+	{
+		ret = false;
+		goto exit;
+	}
+
+	if (EOF == fwrite(&col, sizeof(col), 1, f))
+	{
+		ret = false;
+		goto exit;
+	}
+
+	if (EOF == fwrite(field, sizeof(CELL), row*col, f))
+		ret = false;
+
+exit:
+	fclose(f);
+
+	return ret;
+}
+//--------------------------------------------------------------------
+bool load(char *FileName)
+{
+	char newpath[_MAX_PATH];
+
+	strcpy(newpath, path);
+	strcat(newpath, "\\");
+	strcat(newpath, FileName);
+
+	FILE *f = fopen(newpath, "rb");
+
+	if (f == NULL)
+		return false;
+
+	bool ret = true;
+	/*
+	for (size_t i = 0; ret && i < row; i++)
+	{
+	for (size_t j = 0; j < col; j++)
+	{
+	if (EOF == fread(&field[i][j], sizeof(CELL), 1, f))
+	{
+	ret = false;
+	break;
+	}
+	}
+	}
+	*/
+	char tag[3];
+	if (EOF == fread(tag, 3, 1, f))
+	{
+		ret = false;
+		goto exit;
+	}
+
+	if (strncmp(tag, TAG, 3) != 0)
+	{
+		ret = false;
+		goto exit;
+	}
+
+	int r;
+	if (EOF == fread(&r, sizeof(row), 1, f))
+	{
+		ret = false;
+		goto exit;
+	}
+
+	if (r != row)
+	{
+		ret = false;
+		goto exit;
+	}
+
+	int c;
+	if (EOF == fread(&c, sizeof(col), 1, f))
+	{
+		ret = false;
+		goto exit;
+	}
+
+	if (c != col)
+	{
+		ret = false;
+		goto exit;
+	}
+
+	if (EOF == fread(field, sizeof(CELL), row*col, f))
+		ret = false;
+
+exit:
+	fclose(f);
+
+	return ret;
+}
+//--------------------------------------------------------------------
+void Cursor(bool showFlag)
+{
+	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	CONSOLE_CURSOR_INFO     cursorInfo;
+
+	GetConsoleCursorInfo(out, &cursorInfo);
+	cursorInfo.bVisible = showFlag; // set the cursor visibility
+	SetConsoleCursorInfo(out, &cursorInfo);
+}
+//----------------------------------------------------------------------
+char * AskFileName(char *Prompt)
+{
+	static char Buff[_MAX_PATH];
+
+	COORDS(28, 0);
+	cout << Prompt;
+	Cursor(true);
+	cin >> Buff;
+	Cursor(false);
+	COORDS(28, 0);
+	for (size_t i = 0; i < 70; i++)
+	{
+		cout << " ";
+	}
+
+	return Buff;
+}
+//----------------------------------------------------------------------

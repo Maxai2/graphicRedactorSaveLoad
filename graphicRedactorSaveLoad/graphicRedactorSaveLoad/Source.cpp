@@ -1,34 +1,111 @@
-﻿#include <time.h>
-#include <windows.h>
+﻿//#include <windows.h>
 //-----------------------------------------------
+#include <io.h>
 #include "draw.h"
 
-using namespace std;
-
-void main()
+char path[_MAX_PATH];
+CELL field[row][col];
+int fg = 7, bg = 0;
+char sym = '*';
+bool color = true;
+//----------------------------------------------------------
+void main(int argc, char *argv[])
 {
-	srand(time(NULL));
+	strcpy(path, argv[0]);
+	char *s = strrchr(path, '\\');
+	*s = 0;
+//	strcat(path, "\\picture.dat");
+	//sprintf(path, "%s%s", getenv("USERPROFILE"), "//Desktop//Example//Task.dat");
 
-	CELL field[row][col] = {};
-	ShowConsoleCursor(false);
-	menu(field);
+/*
+	_finddata_t fd;
+	int r = _findfirst(path, &fd);
+	
+	if (r != -1)
+	{
+		_findclose(r);
+		load(field);
+	}
+*/
+	int sel = 0;
+	cout << sizeof(CELL);
 
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	for (int j = 0; j < 30; j++)
-	//	{
-	//		field[i][j].symbol = rand() % 230 + 15;
-	//		field[i][j].bg = Colors(rand() % 16);
-	//		field[i][j].fg = Colors(rand() % 16);
-	//	}
-	//}
+	system("pause");
 
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	for (int j = 0; j < 30; j++)
-	//	{
-	//		drawData(field[i][j].symbol, field[i][j].fg, field[i][j].bg);
-	//	}
-	//	cout << endl;
-	//}
+	bool bFirst = true;
+	while (true)
+	{
+		Command res = menu(bFirst, sel);
+		if (bFirst)
+		{
+			bFirst = false;
+			clearMenu();
+			ShowSymCol();
+			sel = 0;
+		}
+
+		bool bDraw = false;
+
+		switch (res)
+		{
+		case cNew:
+			clearTable();
+			frame();
+			bDraw = true;
+			break;
+		case cColors:
+			color = false;
+			showMenu(false, sel);
+			Cursor(true);
+			fg = cColorfg();
+			bg = cColorbg();
+			clearColorRedact();
+			color = true;
+			Cursor(false);
+			break;
+		case cSymbols:
+			color = false;
+			showMenu(false, sel);
+			sym = cSymbol();
+			color = true;
+			symbols();
+			break;
+		case cClear:
+			clearTable();
+			frame();
+			bDraw = true;
+			break;
+		case cLoad:
+		{
+			char *s = AskFileName("Input file name for load >");
+			if (*s)
+				load(s);
+			frame();
+			bDraw = true;
+			break;
+		}
+		case cSave:
+		{
+			char *s = AskFileName("Input file name for save >");
+			if (*s)
+				save(s);
+			break;
+		}
+		case cExit:
+			return;
+		case cDraw:
+			bDraw = true;
+			break;
+		}
+
+		if (bDraw)
+		{
+			color = false;
+			showMenu(false, sel);
+			Cursor(true);
+			draw(sym, fg, bg);
+			color = true;
+		}
+	}
 }
+//----------------------------------------------------------------------------------
