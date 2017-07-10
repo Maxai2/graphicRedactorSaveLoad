@@ -1,4 +1,4 @@
-﻿//#include <windows.h>
+//#include <windows.h>
 //-----------------------------------------------
 #include <io.h>
 #include "draw.h"
@@ -28,9 +28,9 @@ void main(int argc, char *argv[])
 	}
 */
 	int sel = 0;
-	cout << sizeof(CELL);
+	//cout << sizeof(CELL);
 
-	system("pause");
+//	system("pause");
 
 	bool bFirst = true;
 	while (true)
