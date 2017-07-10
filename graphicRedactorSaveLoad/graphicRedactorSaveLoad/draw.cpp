@@ -73,76 +73,6 @@ Command menu(bool first, int &sel)
 			return cDraw;
 	}
 }
-/*
-					if (count == 3)
-				{
-					newPicture();
-					clearMenu();
-					choose--;
-				}	//New
-				else
-				{
-					color = false;
-					showMenu(choose, sel);
-					Cursor(true);
-					fg = cColorfg();
-					bg = cColorbg();
-					clearColorRedact();
-					color = true;
-					Cursor(false);
-				}
-				//cColorfgbg();
-				break;
-
-			case 1:
-				if (count == 3)
-				{
-					load();
-				}	//Load 
-				else
-				{
-					color = false;
-					showMenu(choose, sel);
-					sym = cSymbol();
-					color = true;
-					symbols();
-				}
-				//cSymbol();
-				break;
-
-			case 2:
-				if (count == 3)
-					return;
-				//Exit 
-				else
-					clearTable();
-				break;
-
-			case 3:
-				load();
-				// Load
-				break;
-
-			case 4:
-				save();
-				//Save
-				break;
-
-			case 5:
-				return;
-				//Exit
-			}
-		}
-		else if (key == 9) // Tab
-		{
-			color = false;
-			showMenu(choose, sel);
-			Cursor(true);
-			draw(sym, fg, bg);
-		}
-	}
-*/
-
 //-----------------------------------------------------------------------------------------------
 void frame()
 {
@@ -352,8 +282,10 @@ void draw(char sym, int fg, int bg)
 		{
 			CELL *f = &field[r][c];
 			f->symbol = sym;
-			f->fg = fg & 0xF;
-			f->bg = bg & 0xF;
+			f->fg = (Colors)fg;
+			f->bg = (Colors)bg;
+			//f->fg = fg & 0xF;
+			//f->bg = bg & 0xF;
 
 			drawData(f->symbol, (Colors)f->fg, (Colors)f->bg);
 		}
