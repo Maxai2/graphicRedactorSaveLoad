@@ -26,17 +26,17 @@ enum Colors
 	WHITE
 };
 //-----------------------------------------------------------------------------------------------
-#pragma pack(1)
+//#pragma pack(1)
 typedef struct
 {
 	char symbol;
-	//Colors bg;
-	//Colors fg;
-	char bg : 4;
-	char fg : 4;
+	Colors bg;
+	Colors fg;
+	//char bg : 4;
+	//char fg : 4;
 }
 CELL;
-#pragma pack(4)
+//#pragma pack(4)
 //-----------------------------------------------
 const int row = 20, col = 50;
 const int rowS = 7, colS = 18;
